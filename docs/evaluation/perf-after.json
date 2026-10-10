@@ -1,0 +1,30 @@
+{
+  "provider": "openai",
+  "model": "~openai/gpt-mini-latest",
+  "cache": true,
+  "runs": 18,
+  "miss": {
+    "input": 0.0003,
+    "preprocessing": 0.0,
+    "rules": 0.0,
+    "llm": 2.7202,
+    "postprocessing": 0.0,
+    "total": 2.7205
+  },
+  "hit": {
+    "input": 0.0005,
+    "preprocessing": 0.0,
+    "rules": 0.0,
+    "llm": 0.0,
+    "postprocessing": 0.0,
+    "total": 0.0006
+  },
+  "median_total_per_case": {
+    "00-example": 0.0004,
+    "01-natural-tone": 0.0024,
+    "02-darker-warm": 0.0026,
+    "03-grey-natural": 0.0012,
+    "04-roots-vs-length": 0.0006,
+    "05-henna": 0.0005
+  }
+}

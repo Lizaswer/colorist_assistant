@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ассистент колориста</title>
+<style>
+  :root {
+    --bg: #faf8f5; --card: #ffffff; --text: #2b2724; --muted: #7a716a;
+    --line: #e6e0d9; --accent: #8a4f7d; --accent-soft: #f3e8f0;
+    --warn: #a15c12; --warn-soft: #fdf1e2; --ok: #2f7a4a; --ok-soft: #e6f4ea;
+    --err: #b3261e; --err-soft: #fdecea;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 22px; margin: 8px 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .tab { flex: 1; padding: 10px; border: 1px solid var(--line); background: var(--card);
+         border-radius: 10px; cursor: pointer; font: inherit; color: var(--text); }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+          padding: 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 17px; margin: 0 0 12px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+  label { display: block; font-size: 14px; color: var(--muted); }
+  input, select { width: 100%; margin-top: 4px; padding: 9px 10px; font: inherit;
+                  border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--text); }
+  .check { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: 15px; }
+  .check input { width: auto; margin: 0; }
+  .row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; margin-bottom: 8px; }
+  .btn { padding: 12px 16px; border: 0; border-radius: 10px; background: var(--accent);
+         color: #fff; font: inherit; font-weight: 600; cursor: pointer; width: 100%; }
+  .btn.ghost { background: var(--accent-soft); color: var(--accent); width: auto; }
+  .btn.icon { background: transparent; color: var(--muted); width: auto; padding: 9px; }
+  .hidden { display: none; }
+  .formula { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .meta { color: var(--muted); margin: 0 0 12px; }
+  ul.notes { list-style: none; padding: 0; margin: 0; }
+  ul.notes li { padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; background: var(--bg); }
+  ul.notes li.warn { background: var(--warn-soft); }
+  .rule { display: inline-block; font: 12px/1.6 ui-monospace, monospace; color: var(--accent);
+          background: var(--accent-soft); border-radius: 6px; padding: 0 6px; margin-left: 6px; }
+  .banner { padding: 10px 12px; border-radius: 10px; margin-bottom: 12px; font-weight: 600; }
+  .banner.ok { background: var(--ok-soft); color: var(--ok); }
+  .banner.bad { background: var(--warn-soft); color: var(--warn); }
+  .banner.err { background: var(--err-soft); color: var(--err); font-weight: 400; }
+  .disclaimer { color: var(--muted); font-size: 13px; text-align: center; margin: 24px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ассистент колориста</h1>
+  <p class="sub">Первая версия: тон в тон и затемнение на 1–2 тона. Правила черновые, проверяются с колористами.</p>
+
+  <div class="tabs">
+    <button class="tab active" data-mode="calc">Рассчитать формулу</button>
+    <button class="tab" data-mode="check">Проверить мою формулу</button>
+  </div>
+
+  <form id="form">
+    <section class="card">
+      <h2>Волосы клиента</h2>
+      <div class="grid">
+        <label>Уровень у корней (1–10)<input name="root_level" type="number" min="1" max="10" value="7" required></label>
+        <label>Уровень по длине (1–10)<input name="length_level" type="number" min="1" max="10" value="7" required></label>
+        <label>Седина, %<input name="grey_percent" type="number" min="0" max="100" value="30" required></label>
+        <label>Пористость
+          <select name="porosity">
+            <option value="low">низкая</option>
+            <option value="medium" selected>средняя</option>
+            <option value="high">высокая</option>
+          </select>
+        </label>
+        <label class="check"><input name="has_henna" type="checkbox"> Хна или басма в истории</label>
+        <label class="check"><input name="has_keratin" type="checkbox"> Кератин / ботокс недавно</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Желаемый результат</h2>
+      <div class="grid">
+        <label>Уровень (1–10)<input name="target_level" type="number" min="1" max="10" value="7" required></label>
+        <label>Направление
+          <select name="direction">
+            <option value="natural">натуральный</option>
+            <option value="cool" selected>холодный</option>
+            <option value="warm">тёплый</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="card hidden" id="master">
+      <h2>Моя формула</h2>
+      <div id="components"></div>
+      <button type="button" class="btn ghost" id="add">+ Оттенок</button>
+      <div class="grid" style="margin-top:12px">
+        <label>Оксид, %<input name="oxide_percent" type="number" step="0.5" min="0" max="12" value="3"></label>
+      </div>
+    </section>
+
+    <button class="btn" type="submit" id="submit">Рассчитать</button>
+  </form>
+
+  <section class="card hidden" id="result" style="margin-top:16px" aria-live="polite"></section>
+
+  <p class="disclaimer">Ассистент помогает мастеру, но не заменяет его. Тест на аллергию обязателен.</p>
+</main>
+
+<script>
+  let mode = "calc";
+  const form = document.getElementById("form");
+  const result = document.getElementById("result");
+  const componentsBox = document.getElementById("components");
+
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = String(text);
+    return div.innerHTML;
+  }
+
+  function addComponent(shade = "", grams = 60) {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML =
+      '<label>Оттенок<input class="shade" placeholder="7/1" value="' + escapeHtml(shade) + '" required></label>' +
+      '<label>Граммы<input class="grams" type="number" min="1" value="' + grams + '" required></label>' +
+      '<button type="button" class="btn icon" title="Удалить">✕</button>';
+    row.querySelector("button").onclick = () => {
+      if (componentsBox.children.length > 1) row.remove();
+    };
+    componentsBox.appendChild(row);
+  }
+  addComponent("7/3", 60);
+  document.getElementById("add").onclick = () => addComponent();
+
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.onclick = () => {
+      mode = tab.dataset.mode;
+      document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t === tab));
+      document.getElementById("master").classList.toggle("hidden", mode !== "check");
+      componentsBox.querySelectorAll("input").forEach((i) => (i.required = mode === "check"));
+      document.getElementById("submit").textContent = mode === "calc" ? "Рассчитать" : "Проверить";
+      result.classList.add("hidden");
+    };
+  });
+  componentsBox.querySelectorAll("input").forEach((i) => (i.required = false));
+
+  function readPayload() {
+    const f = new FormData(form);
+    const payload = {
+      hair: {
+        root_level: Number(f.get("root_level")),
+        length_level: Number(f.get("length_level")),
+        grey_percent: Number(f.get("grey_percent")),
+        porosity: f.get("porosity"),
+        has_henna: f.get("has_henna") === "on",
+        has_keratin: f.get("has_keratin") === "on",
+      },
+      target: { level: Number(f.get("target_level")), direction: f.get("direction") },
+    };
+    if (mode === "check") {
+      payload.formula = {
+        components: [...componentsBox.children].map((row) => ({
+          shade: row.querySelector(".shade").value.trim(),
+          grams: Number(row.querySelector(".grams").value),
+        })),
+        oxide_percent: Number(f.get("oxide_percent")),
+      };
+    }
+    return payload;
+  }
+
+  function notesList(notes, cls = "") {
+    return '<ul class="notes">' + notes.map((n) =>
+      '<li class="' + cls + '">' + escapeHtml(n.text) + '<span class="rule">' + escapeHtml(n.rule_id) + "</span></li>"
+    ).join("") + "</ul>";
+  }
+
+  function renderFormula(data) {
+    const f = data.formula;
+    const shades = f.components.map((c) => escapeHtml(c.shade) + " — " + c.grams + " г").join(" + ");
+    result.innerHTML =
+      '<h2>Формула</h2>' +
+      '<p class="formula">' + shades + "</p>" +
+      '<p class="meta">Оксид ' + f.oxide_percent + "%, смешивание " + escapeHtml(f.mix_ratio) +
+      ", выдержка " + f.time_min + " мин</p>" +
+      "<h2>Почему так</h2>" + notesList(f.steps) +
+      (f.warnings.length ? "<h2 style='margin-top:12px'>Обратите внимание</h2>" + notesList(f.warnings, "warn") : "");
+  }
+
+  function renderCheck(data) {
+    result.innerHTML = data.ok
+      ? '<div class="banner ok">Известных рисков не найдено</div>'
+      : '<div class="banner bad">Найдено рисков: ' + data.risks.length + "</div>" + notesList(data.risks, "warn");
+  }
+
+  function renderError(detail) {
+    let text = "Не удалось обработать анкету.";
+    if (detail && typeof detail === "object" && detail.message) {
+      text = detail.message + (detail.rule_id ? " [" + detail.rule_id + "]" : "");
+    } else if (Array.isArray(detail)) {
+      text = "Проверьте поля анкеты: " + detail.map((d) => d.loc.slice(-1)[0]).join(", ");
+    }
+    result.innerHTML = '<div class="banner err">' + escapeHtml(text) + "</div>";
+  }
+
+  form.onsubmit = async (event) => {
+    event.preventDefault();
+    const url = mode === "calc" ? "/formula/calculate" : "/formula/check";
+    result.classList.remove("hidden");
+    result.innerHTML = '<p class="meta">Считаю…</p>';
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(readPayload()),
+      });
+      const data = await response.json();
+      if (!response.ok) renderError(data.detail);
+      else if (mode === "calc") renderFormula(data);
+      else renderCheck(data);
+    } catch (error) {
+      renderError(null);
+    }
+    result.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+</script>
+</body>
+</html>

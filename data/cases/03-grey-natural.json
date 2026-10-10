@@ -1,0 +1,35 @@
+{
+  "id": "03-grey-natural",
+  "source": "Синтетический случай для проверки сквозного сценария; эталон по общим правилам колористики, НЕ подтверждён колористом.",
+  "hair": {
+    "root_level": 5,
+    "length_level": 5,
+    "grey_percent": 60
+  },
+  "target": {
+    "level": 5,
+    "direction": "natural"
+  },
+  "expected": {
+    "components": [
+      {
+        "shade": "5/0",
+        "grams": 60
+      }
+    ],
+    "oxide_percent": 6.0,
+    "time_min": 45
+  },
+  "master_formula": {
+    "components": [
+      {
+        "shade": "5/0",
+        "grams": 60
+      }
+    ],
+    "oxide_percent": 3.0
+  },
+  "expected_risk_ids": [
+    "C-OX-GREY"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "06-lightening-refused",
+  "source": "Синтетический случай для проверки сквозного сценария; эталон по общим правилам колористики, НЕ подтверждён колористом.",
+  "hair": {
+    "root_level": 6,
+    "length_level": 6,
+    "grey_percent": 0
+  },
+  "target": {
+    "level": 8,
+    "direction": "natural"
+  },
+  "expected_refusal": "R-SCOPE-LIGHTEN"
+}

@@ -1,0 +1,26 @@
+{
+  "id": "05-henna",
+  "source": "Синтетический случай для проверки сквозного сценария; эталон по общим правилам колористики, НЕ подтверждён колористом.",
+  "hair": {
+    "root_level": 6,
+    "length_level": 6,
+    "grey_percent": 0,
+    "has_henna": true
+  },
+  "target": {
+    "level": 6,
+    "direction": "natural"
+  },
+  "expected": {
+    "components": [
+      {
+        "shade": "6/0",
+        "grams": 60
+      }
+    ],
+    "oxide_percent": 3.0,
+    "time_min": 35,
+    "strand_test_first": true
+  },
+  "known_gap": "При хне система выдаёт формулу с предупреждением, а мастер сначала делает тест на прядь и только потом решает, красить ли."
+}

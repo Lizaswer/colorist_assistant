@@ -1,0 +1,21 @@
+{
+  "provider": "openai",
+  "model": "~openai/gpt-mini-latest",
+  "runs": 18,
+  "median_sec": {
+    "input": 0.0006,
+    "preprocessing": 0.0,
+    "rules": 0.0,
+    "llm": 2.4985,
+    "postprocessing": 0.0001,
+    "total": 2.4997
+  },
+  "median_total_per_case": {
+    "00-example": 2.573,
+    "01-natural-tone": 2.859,
+    "02-darker-warm": 2.216,
+    "03-grey-natural": 2.303,
+    "04-roots-vs-length": 2.192,
+    "05-henna": 2.609
+  }
+}

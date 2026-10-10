@@ -1,0 +1,36 @@
+{
+  "id": "02-darker-warm",
+  "source": "Синтетический случай для проверки сквозного сценария; эталон по общим правилам колористики, НЕ подтверждён колористом.",
+  "hair": {
+    "root_level": 8,
+    "length_level": 8,
+    "grey_percent": 0
+  },
+  "target": {
+    "level": 6,
+    "direction": "warm"
+  },
+  "expected": {
+    "components": [
+      {
+        "shade": "6/3",
+        "grams": 60
+      }
+    ],
+    "oxide_percent": 3.0,
+    "time_min": 35
+  },
+  "master_formula": {
+    "components": [
+      {
+        "shade": "6/1",
+        "grams": 60
+      }
+    ],
+    "oxide_percent": 3.0
+  },
+  "expected_risk_ids": [
+    "C-DIRECTION-MISMATCH"
+  ],
+  "known_gap": "Проверка не замечает, что мастер взял пепельный нюанс при тёплой цели: правила о несовпадении направления оттенка ещё нет."
+}

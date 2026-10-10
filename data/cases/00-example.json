@@ -1,0 +1,44 @@
+{
+  "id": "00-example",
+  "source": "Синтетический случай для проверки сквозного сценария; эталон по общим правилам колористики, НЕ подтверждён колористом.",
+  "hair": {
+    "root_level": 7,
+    "length_level": 7,
+    "grey_percent": 30,
+    "porosity": "medium",
+    "has_henna": false,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 7,
+    "direction": "cool"
+  },
+  "expected": {
+    "components": [
+      {
+        "shade": "7/1",
+        "grams": 45
+      },
+      {
+        "shade": "7/0",
+        "grams": 15
+      }
+    ],
+    "oxide_percent": 6.0,
+    "time_min": 45
+  },
+  "master_formula": {
+    "components": [
+      {
+        "shade": "7/3",
+        "grams": 60
+      }
+    ],
+    "oxide_percent": 3.0
+  },
+  "expected_risk_ids": [
+    "C-OX-GREY",
+    "C-GREY-NO-NATURAL",
+    "C-WARM-NO-ASH"
+  ]
+}

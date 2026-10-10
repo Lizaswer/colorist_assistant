@@ -1,0 +1,32 @@
+{
+  "id": "04-roots-vs-length",
+  "source": "Синтетический случай для проверки сквозного сценария; эталон по общим правилам колористики, НЕ подтверждён колористом. Значения для длины условные.",
+  "hair": {
+    "root_level": 6,
+    "length_level": 8,
+    "grey_percent": 0,
+    "porosity": "high"
+  },
+  "target": {
+    "level": 6,
+    "direction": "warm"
+  },
+  "expected": {
+    "components": [
+      {
+        "shade": "6/3",
+        "grams": 60
+      }
+    ],
+    "oxide_percent": 3.0,
+    "time_min": 35,
+    "length_components": [
+      {
+        "shade": "6/3",
+        "grams": 40
+      }
+    ],
+    "length_oxide_percent": 1.5
+  },
+  "known_gap": "Система считает одну формулу по корням и не учитывает, что длина светлее и пористее — нужна отдельная формула для длины."
+}

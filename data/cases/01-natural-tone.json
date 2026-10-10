@@ -1,0 +1,33 @@
+{
+  "id": "01-natural-tone",
+  "source": "Синтетический случай для проверки сквозного сценария; эталон по общим правилам колористики, НЕ подтверждён колористом.",
+  "hair": {
+    "root_level": 6,
+    "length_level": 6,
+    "grey_percent": 0
+  },
+  "target": {
+    "level": 6,
+    "direction": "natural"
+  },
+  "expected": {
+    "components": [
+      {
+        "shade": "6/0",
+        "grams": 60
+      }
+    ],
+    "oxide_percent": 3.0,
+    "time_min": 35
+  },
+  "master_formula": {
+    "components": [
+      {
+        "shade": "6/0",
+        "grams": 60
+      }
+    ],
+    "oxide_percent": 3.0
+  },
+  "expected_risk_ids": []
+}
