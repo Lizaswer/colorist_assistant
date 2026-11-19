@@ -1,0 +1,25 @@
+{
+  "id": "05-wella-illumina-warm",
+  "verified": false,
+  "brand": "wella",
+  "line": "illumina",
+  "hair": {
+    "root_level": 7,
+    "length_level": 7,
+    "grey_percent": 10,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 7,
+    "direction": "warm"
+  },
+  "expected": {
+    "components": [
+      {"shade": "7/3", "grams": 100}
+    ],
+    "oxide_percent": 6,
+    "mix_ratio": "1:1",
+    "time_min": 35
+  },
+  "known_gap": "Седина ниже 20% — натуральная база не требуется. Illumina имеет мягкую пигментацию; пропорции нужно подтвердить по карте бренда."
+}

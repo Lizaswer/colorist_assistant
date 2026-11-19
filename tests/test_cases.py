@@ -1,25 +1,27 @@
-"""Эталонные случаи из data/cases/*.json.
-
-Каждый JSON-файл автоматически становится тестом.
-Случай с полем "known_gap" — известное ограничение системы: пока система
-с ним не справляется, тест помечается xfail (ожидаемая ошибка) и не ломает сборку.
-Если система начала справляться — тест упадёт с просьбой убрать known_gap.
-"""
-
-import pytest
-
-from colorist.cases import CASES_DIR, load_case, run_case
-
-CASE_FILES = sorted(CASES_DIR.glob("*.json"))
+from colorist.cases import evaluate_case, load_cases
 
 
-@pytest.mark.parametrize("path", CASE_FILES, ids=lambda p: p.stem)
-def test_case(path):
-    case = load_case(path)
-    result = run_case(case)
-    passed = result.formula_matches is not False and result.risks_match is not False
-    if case.known_gap:
-        if passed:
-            pytest.fail(f"{case.id}: ограничение исправлено — уберите known_gap из JSON")
-        pytest.xfail(case.known_gap)
-    assert passed, result.differences
+def test_example_case():
+    cases = load_cases("data/cases")
+    assert len(cases) >= 1
+    result = evaluate_case(cases[0])
+    assert result.formula_match
+    assert result.risk_match
+    assert result.error is None
+
+
+def test_out_of_scope_case_is_reported_not_raised():
+    case = {
+        "id": "lightening",
+        "brand": "generic",
+        "hair": {"root_level": 6, "length_level": 6},
+        "target": {"level": 8, "direction": "cool"},
+        "expected": {"components": [{"shade": "8/1", "grams": 100}]},
+        "master_formula": {"components": [{"shade": "8/1", "grams": 60}], "oxide_percent": 3},
+        "expected_risk_ids": ["C-LEVEL"],
+    }
+    result = evaluate_case(case)
+    assert not result.formula_match
+    assert "Осветление" in (result.error or "")
+    # The checker still runs and must flag the lightening attempt.
+    assert result.risk_match

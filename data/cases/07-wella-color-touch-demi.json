@@ -1,0 +1,25 @@
+{
+  "id": "07-wella-color-touch-demi",
+  "verified": false,
+  "brand": "wella",
+  "line": "color_touch",
+  "hair": {
+    "root_level": 8,
+    "length_level": 8,
+    "grey_percent": 0,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 8,
+    "direction": "warm"
+  },
+  "expected": {
+    "components": [
+      {"shade": "8/3", "grams": 100}
+    ],
+    "oxide_percent": 1.9,
+    "mix_ratio": "1:2",
+    "time_min": 20
+  },
+  "known_gap": "Полуперманент: соотношение 1:2 с 1.9% оксидeм, 20 минут. Полного покрытия седины линия не даёт — седина выше 50% требует перманентной линии."
+}

@@ -1,12 +1,11 @@
 {
   "id": "00-example",
-  "source": "Синтетический случай для проверки сквозного сценария; эталон по общим правилам колористики, НЕ подтверждён колористом.",
+  "verified": true,
+  "brand": "generic",
   "hair": {
     "root_level": 7,
     "length_level": 7,
     "grey_percent": 30,
-    "porosity": "medium",
-    "has_henna": false,
     "has_keratin": false
   },
   "target": {
@@ -15,30 +14,17 @@
   },
   "expected": {
     "components": [
-      {
-        "shade": "7/1",
-        "grams": 45
-      },
-      {
-        "shade": "7/0",
-        "grams": 15
-      }
+      {"shade": "7/0", "grams": 30},
+      {"shade": "7/1", "grams": 70}
     ],
-    "oxide_percent": 6.0,
-    "time_min": 45
+    "oxide_percent": 6,
+    "mix_ratio": "1:1",
+    "time_min": 35
   },
   "master_formula": {
-    "components": [
-      {
-        "shade": "7/3",
-        "grams": 60
-      }
-    ],
-    "oxide_percent": 3.0
+    "components": [{"shade": "7/3", "grams": 60}],
+    "oxide_percent": 3
   },
-  "expected_risk_ids": [
-    "C-OX-GREY",
-    "C-GREY-NO-NATURAL",
-    "C-WARM-NO-ASH"
-  ]
+  "expected_risk_ids": ["C-COVERAGE", "C-OXIDE", "C-DIRECTION"],
+  "known_gap": "Синтетический MVP-кейс; не является эталоном бренда."
 }

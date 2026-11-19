@@ -1,88 +1,48 @@
-"""Прогон всех эталонных случаев и отчёт для документации.
-
-Запуск:  python scripts/evaluate.py
-Результат: docs/evaluation/report.md (перезаписывается при каждом запуске).
-"""
-
-from __future__ import annotations
-
-import sys
-from datetime import date
 from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
-
-from colorist.cases import fmt, load_cases, run_case  # noqa: E402
-
-REPORT = ROOT / "docs" / "evaluation" / "report.md"
+from colorist.cases import evaluate_case, load_cases
 
 
-def status(result) -> str:
-    case = result.case
-    ok = result.formula_matches is not False and result.risks_match is not False
-    if case.expected_refusal and ok:
-        return "✅ корректный отказ"
-    if ok:
-        return "✅ совпало"
-    if case.known_gap:
-        return "⚠️ известное ограничение"
-    return "❌ ошибка"
+def _mark(value: bool | None) -> str:
+    if value is None:
+        return "SKIP"
+    return "OK" if value else "FAIL"
 
 
-def system_answer(result) -> str:
-    if result.formula is None:
-        return f"отказ: {result.error}"
-    f = result.formula
-    return f"{fmt(f.components)}, {f.oxide_percent}%, {f.time_min} мин"
-
-
-def main() -> None:
-    results = [run_case(case) for case in load_cases()]
-    statuses = [status(r) for r in results]
-    ok = sum(s.startswith("✅") for s in statuses)
-    gaps = sum(s.startswith("⚠️") for s in statuses)
-    errors = sum(s.startswith("❌") for s in statuses)
-    verified = sum(r.case.verified for r in results)
-
-    lines = [
-        "# Отчёт о прогоне эталонных случаев",
-        "",
-        f"Дата: {date.today():%d.%m.%Y}. Случаев: {len(results)}, "
-        f"из них подтверждено колористами: {verified}.",
-        "",
-        f"**Итог:** совпало {ok}, известные ограничения {gaps}, ошибки {errors}.",
-        "",
-    ]
-    if verified == 0:
-        lines += [
-            "> Все случаи пока синтетические: эталон составлен по общим правилам,",
-            "> а не колористом. Отчёт показывает, что сквозной сценарий работает и где",
-            "> у системы границы, но не говорит о точности. Точность (цель — не менее 80%",
-            "> формул «верно» или «допустимо») измеряется на реальных случаях слепой оценкой.",
-            "",
-        ]
-    lines += [
-        "| Случай | Ответ системы | Результат | Расхождения |",
-        "| --- | --- | --- | --- |",
-    ]
-    for result, st in zip(results, statuses):
-        diffs = "; ".join(result.differences) or "—"
-        lines.append(f"| {result.case.id} | {system_answer(result)} | {st} | {diffs} |")
-
-    gap_cases = [r.case for r in results if r.case.known_gap]
-    if gap_cases:
-        lines += ["", "## Известные ограничения", ""]
-        lines += [f"- **{c.id}** — {c.known_gap}" for c in gap_cases]
-
-    REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
+def main() -> int:
+    cases = load_cases()
+    lines = ["# Evaluation report", "", "| Case | Verified | Formula | Risks |", "|---|---:|---:|---:|"]
+    failures = 0
+    skipped = 0
+    for case in cases:
+        result = evaluate_case(case)
+        if result.formula_match is None and result.risk_match is None:
+            skipped += 1
+        elif not ((result.formula_match is not False) and (result.risk_match is not False)):
+            failures += 1
+        lines.append(
+            f"| {result.case_id} | {'yes' if result.verified else 'no'} | "
+            f"{_mark(result.formula_match)} | {_mark(result.risk_match)} |"
+        )
+        if result.error:
+            lines.extend(["", f"> Calculator error: {result.error}", ""])
+        if result.skipped_reason:
+            lines.extend(["", f"> Skipped: {result.skipped_reason}", ""])
+        if result.known_gap:
+            lines.extend(["", f"> Known gap: {result.known_gap}", ""])
+    lines.extend(["", f"Итого: {len(cases)} кейсов, {failures} с расхождением, {skipped} пропущено движком."])
+    out = Path("docs/evaluation/report.md")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
-    print(f"\nОтчёт сохранён: {REPORT.relative_to(ROOT)}")
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

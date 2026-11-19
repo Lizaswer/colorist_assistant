@@ -1,144 +1,122 @@
-"""Замер времени по этапам пайплайна:
-input → preprocessing → rules → LLM → postprocessing → result
+"""Pipeline benchmark for the AI-assistant request.
 
-Запуск (нужен ключ API):
-    python scripts/benchmark.py --runs 3 --pause 2 --label before
-    python scripts/benchmark.py --runs 3 --pause 2 --label after --cache
+Reproduces the scenario from docs/evaluation/benchmark-results.md: the same
+question of a master is asked three times and every stage is timed:
 
-В режиме --cache вызов модели идёт через кэш ответов. Первый прогон каждого
-случая — промах (miss), остальные — попадания (hit). Они считаются ОТДЕЛЬНО:
-общая медиана при --runs 3 была бы искусственно хорошей (2 из 3 — повторы).
-Результат: таблица в консоли + docs/evaluation/perf-<label>.json
+    input -> preprocessing -> model/API -> postprocessing -> result
+
+With OPENAI_API_KEY set the first round is a real API call and the next two
+should be served from the cache. Without a key the assistant answers in demo
+mode, which is useful only for checking that the script runs.
+
+Usage:  python scripts/benchmark.py [--rounds N] [--no-cache]
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import statistics as st
+import os
 import sys
 import time
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
+from colorist.api import assistant
+from colorist.api.main import AssistantIn
 
-from colorist.api import explainer, llm  # noqa: E402
-from colorist.cases import CASES_DIR, load_case  # noqa: E402
-from colorist.rules import OutOfScopeError, calculate_formula  # noqa: E402
+STAGES = ("input", "preprocessing", "model/API", "postprocessing", "result")
 
-STAGES = ["input", "preprocessing", "rules", "llm", "postprocessing"]
-
-
-def run_once(path: Path, cached: bool) -> dict | None:
-    clock = time.perf_counter
-    t: dict = {"_foreign_numbers": 0, "_hit": False}
-
-    s = clock()
-    case = load_case(path)                       # input: чтение и разбор карточки
-    t["input"] = clock() - s
-
-    s = clock()
-    try:
-        formula = calculate_formula(case.hair, case.target)   # rules
-    except OutOfScopeError:
-        return None                              # отказ по правилам — LLM не вызывается
-    t["rules"] = clock() - s
-
-    s = clock()
-    prompt = explainer.build_prompt(formula)     # preprocessing
-    t["preprocessing"] = clock() - s
-
-    s = clock()
-    if cached:                                   # model/API через кэш (проверка цифр внутри)
-        hits_before = explainer._ask_cached.cache_info().hits
-        try:
-            answer = explainer._ask_cached(llm.model_name(), explainer.LLM_SYSTEM_PROMPT, prompt)
-        except ValueError:
-            answer = ""
-            t["_foreign_numbers"] = 1
-        t["_hit"] = explainer._ask_cached.cache_info().hits > hits_before
-    else:                                        # model/API напрямую
-        answer = llm.complete(explainer.LLM_SYSTEM_PROMPT, prompt)
-    t["llm"] = clock() - s
-
-    s = clock()
-    if not cached:                               # postprocessing: проверка цифр в ответе
-        t["_foreign_numbers"] = len(explainer.find_foreign_numbers(prompt, answer))
-    t["postprocessing"] = clock() - s
-    t["_answer_chars"] = len(answer)
-    return t
+PAYLOAD = {
+    "messages": [{"role": "user", "content": "Почему в этой формуле выбран 6% оксид и натуральная база?"}],
+    "context": {
+        "исходные_данные": {"root_level": 7, "length_level": 7, "grey_percent": 30, "has_keratin": False},
+        "цель": {"level": 7, "direction": "cool"},
+        "рассчитанная_формула": [{"shade": "7/0", "grams": 30}, {"shade": "7/1", "grams": 70}],
+        "оксид": 6,
+        "соотношение": "1:1",
+        "выдержка_мин": 35,
+    },
+}
 
 
-def summarize(rows: list[dict]) -> dict:
-    out = {k: st.median(r[k] for r in rows) for k in STAGES}
-    out["total"] = st.median(sum(r[k] for k in STAGES) for r in rows)
-    return out
+def run_round() -> tuple[dict[str, float], str]:
+    timings: dict[str, float] = {}
 
+    t = time.perf_counter()
+    parsed = AssistantIn.model_validate(PAYLOAD)
+    timings["input"] = time.perf_counter() - t
 
-def print_table(title: str, rows: list[dict]) -> dict:
-    summ = summarize(rows)
-    totals = sorted(sum(r[k] for k in STAGES) for r in rows)
-    print(f"\n{title} — замеров: {len(rows)}, медиана, сек\n")
-    print(f"{'этап':16s}{'сек':>9s}{'доля':>8s}")
-    for k in STAGES:
-        print(f"{k:16s}{summ[k]:9.4f}{summ[k] / summ['total']:8.1%}")
-    print(f"{'ИТОГО':16s}{summ['total']:9.4f}   (p95: {totals[max(int(len(totals) * 0.95) - 1, 0)]:.3f})")
-    return summ
+    t = time.perf_counter()
+    messages = [m.model_dump() for m in parsed.messages]
+    instructions = assistant.SYSTEM_PROMPT + assistant._context_block(parsed.context)
+    input_items = assistant.build_input(messages)
+    timings["preprocessing"] = time.perf_counter() - t
+
+    t = time.perf_counter()
+    result = assistant.reply(messages, parsed.context)
+    timings["model/API"] = time.perf_counter() - t
+
+    t = time.perf_counter()
+    body = {"answer": result.answer, "cached": result.cached, "demo": result.demo}
+    timings["postprocessing"] = time.perf_counter() - t
+
+    t = time.perf_counter()
+    json.dumps(body, ensure_ascii=False)
+    timings["result"] = time.perf_counter() - t
+
+    del instructions, input_items  # built only to time the preprocessing stage honestly
+    source = "DEMO" if result.demo else ("CACHE HIT" if result.cached else "API call")
+    return timings, source
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--runs", type=int, default=3)
-    ap.add_argument("--label", default="before")
-    ap.add_argument("--pause", type=float, default=0, help="пауза между вызовами, сек (вне замера)")
-    ap.add_argument("--cache", action="store_true", help="вызывать модель через кэш ответов")
-    args = ap.parse_args()
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--rounds", type=int, default=3)
+    parser.add_argument("--no-cache", action="store_true", help="clear the cache before every round (baseline)")
+    args = parser.parse_args()
 
-    print(f"Провайдер: {llm.provider()}, модель: {llm.model_name()}, кэш: {'вкл' if args.cache else 'выкл'}")
-    rows, per_case = [], {}
-    for path in sorted(CASES_DIR.glob("*.json")):
-        runs = []
-        for _ in range(args.runs):
-            r = run_once(path, args.cache)
-            if r:
-                runs.append(r)
-                if not r["_hit"]:                # пауза нужна только после реального вызова
-                    time.sleep(args.pause)
-        if not runs:
-            print(f"{path.stem}: отказ по правилам, LLM не вызывается")
-            continue
-        rows += runs
-        per_case[path.stem] = round(st.median(sum(r[k] for k in STAGES) for r in runs), 4)
+    mode = "OpenAI API" if os.getenv("OPENAI_API_KEY", "").strip() else "demo mode (no OPENAI_API_KEY)"
+    print("Colorist Assistant pipeline benchmark")
+    print(f"Mode: {mode}; cache: {'disabled' if args.no_cache else 'enabled'}; rounds: {args.rounds}")
+    print()
 
-    result: dict = {"provider": llm.provider(), "model": llm.model_name(),
-                    "cache": args.cache, "runs": len(rows)}
-    if args.cache:
-        miss = [r for r in rows if not r["_hit"]]
-        hit = [r for r in rows if r["_hit"]]
-        result["miss"] = {k: round(v, 4) for k, v in print_table("ПРОМАХ КЭША (miss)", miss).items()}
-        if hit:
-            result["hit"] = {k: round(v, 4) for k, v in print_table("ПОПАДАНИЕ (hit)", hit).items()}
-            m, h = result["miss"]["total"], result["hit"]["total"]
-            print("\nПрогноз (расчёт, НЕ замер) при разной доле повторных запросов:")
-            for share in (0.3, 0.5, 0.8):
-                print(f"  {share:>4.0%} повторов → {m * (1 - share) + h * share:.3f} сек в среднем")
-    else:
-        result["median_sec"] = {k: round(v, 4) for k, v in print_table("БЕЗ КЭША", rows).items()}
+    header = f"{'Round':5s} {'Result':10s} " + " ".join(f"{s:>15s}" for s in STAGES) + f" {'Total':>12s}"
+    print(header)
+    print("-" * len(header))
 
-    print(f"\nИскажённых цифр в ответах: {sum(r['_foreign_numbers'] for r in rows)}")
-    answers = [r["_answer_chars"] for r in rows if r["_answer_chars"]]
-    if answers:
-        print(f"Длина ответа модели: медиана {int(st.median(answers))} символов")
-    result["median_total_per_case"] = per_case
+    assistant.clear_cache()
+    totals = {s: 0.0 for s in STAGES}
+    for i in range(1, args.rounds + 1):
+        if args.no_cache:
+            assistant.clear_cache()
+        try:
+            timings, source = run_round()
+        except RuntimeError as exc:
+            print(f"{i:<5d} ERROR      {exc}")
+            print()
+            print("The assistant could not reach the model; fix the cause above and rerun.")
+            return
+        for s in STAGES:
+            totals[s] += timings[s]
+        total = sum(timings.values())
+        print(f"{i:<5d} {source:10s} " + " ".join(f"{timings[s]:>13.6f} s" for s in STAGES) + f" {total:>10.4f} s")
 
-    out = ROOT / "docs" / "evaluation" / f"perf-{args.label}.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Сохранено: {out.relative_to(ROOT)}")
+    print()
+    print("Average per round:")
+    for s in STAGES:
+        print(f"  {s:16s} {totals[s] / args.rounds:10.4f} s")
+    print(f"  {'pipeline':16s} {sum(totals.values()) / args.rounds:10.4f} s")
+
+    bottleneck = max(STAGES, key=lambda s: totals[s])
+    print()
+    print(f"Bottleneck: {bottleneck}")
 
 
 if __name__ == "__main__":

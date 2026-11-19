@@ -1,0 +1,59 @@
+{
+  "id": "12-colorist-root7-length11-blond",
+  "verified": true,
+  "source": "кейс от колориста",
+  "brand": "wella",
+  "line": "koleston_perfect",
+  "notation": "decimal",
+  "hair": {
+    "root_level": 7,
+    "length_level": 11,
+    "grey_percent": 60,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 9,
+    "direction": "cool",
+    "shade_code": "9.26"
+  },
+  "amounts": {
+    "root_grams": 30,
+    "length_grams": 30
+  },
+  "expected_zones": [
+    {
+      "zone": "root",
+      "components": [{"shade": "8.25", "grams": 30}],
+      "oxide_percent": 8,
+      "oxide_grams": 30,
+      "mix_ratio": "1:1",
+      "correctors": [{"shade": "0.25", "cm": 2}]
+    },
+    {
+      "zone": "length",
+      "components": [{"shade": "9.26", "grams": 30}],
+      "oxide_percent": 3,
+      "oxide_grams": 30,
+      "mix_ratio": "1:1",
+      "correctors": [{"shade": "0.25", "cm": 2}]
+    }
+  ],
+  "colorist_solution": {
+    "zones": [
+      {
+        "zone": "корни",
+        "color": [{"shade": "8.25", "grams": 30}],
+        "oxide": {"percent": 8, "grams": 30},
+        "corrector": [{"shade": "0.25", "cm": 2}]
+      },
+      {
+        "zone": "длина",
+        "color": [{"shade": "9.26", "grams": 30}],
+        "oxide": {"percent": 3, "grams": 30},
+        "corrector": [{"shade": "0.25", "cm": 2}]
+      }
+    ],
+    "summary": "Корни: 8.25 (30 г) + 8% (30 г) + корректор 0.25 (2 см). Длина: 9.26 (30 г) + 3% (30 г) + корректор 0.25 (2 см)."
+  },
+  "known_gap": "Оксид 8% не входит в стандартную линейку Welloxon (3/4/6/9/12) — значение взято из кейса колориста и требует сверки с брендом."
+}

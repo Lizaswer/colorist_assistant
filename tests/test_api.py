@@ -1,57 +1,77 @@
-"""API: проверка эндпоинтов через тестовый клиент FastAPI."""
+from fastapi.testclient import TestClient
 
-import pytest
-
-pytest.importorskip("fastapi")
-pytest.importorskip("httpx")
-
-from fastapi.testclient import TestClient  # noqa: E402
-
-from colorist.api.main import app  # noqa: E402
+from colorist.api.main import app
 
 client = TestClient(app)
 
-HAIR = {"root_level": 7, "length_level": 7, "grey_percent": 30}
-TARGET = {"level": 7, "direction": "cool"}
-
 
 def test_health():
-    assert client.get("/health").json() == {"status": "ok"}
-
-
-def test_calculate_returns_formula_and_explanation():
-    response = client.post("/formula/calculate", json={"hair": HAIR, "target": TARGET})
+    response = client.get("/health")
     assert response.status_code == 200
-    body = response.json()
-    assert body["formula"]["oxide_percent"] == 6.0
-    assert "R-OX-GREY" in body["explanation"]
+    assert response.json() == {"status": "ok"}
 
 
-def test_calculate_lightening_is_422():
+def test_calculate_endpoint():
     response = client.post(
         "/formula/calculate",
-        json={"hair": HAIR, "target": {"level": 9, "direction": "natural"}},
-    )
-    assert response.status_code == 422
-    assert response.json()["detail"]["rule_id"] == "R-SCOPE-LIGHTEN"
-
-
-def test_check_finds_risks():
-    response = client.post(
-        "/formula/check",
         json={
-            "hair": HAIR,
-            "target": TARGET,
-            "formula": {"components": [{"shade": "7/0", "grams": 60}], "oxide_percent": 3},
+            "hair": {"root_level": 7, "length_level": 7, "grey_percent": 30, "has_keratin": False},
+            "target": {"level": 7, "direction": "cool"},
         },
     )
     assert response.status_code == 200
-    body = response.json()
-    assert body["ok"] is False
-    assert {r["rule_id"] for r in body["risks"]} >= {"C-OX-GREY", "C-WARM-NO-ASH"}
+    data = response.json()
+    assert data["oxide_percent"] == 6
+    assert data["components"][0]["shade"] == "7/0"
 
 
-def test_index_page_is_served():
-    response = client.get("/")
+def test_calculate_preserves_explicit_shade_code():
+    response = client.post(
+        "/formula/calculate",
+        json={
+            "hair": {"root_level": 7, "length_level": 7},
+            "target": {"level": 7, "direction": "warm", "shade_code": "7.43"},
+        },
+    )
     assert response.status_code == 200
-    assert "Ассистент колориста" in response.text
+    assert response.json()["components"] == [{"shade": "7.43", "grams": 100.0}]
+
+
+def test_calculate_rejects_invalid_zone_grams():
+    response = client.post(
+        "/formula/calculate",
+        json={
+            "hair": {"root_level": 7, "length_level": 6},
+            "target": {"level": 6},
+            "zoned": True,
+            "root_grams": 0,
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_calculate_rejects_non_finite_zone_grams():
+    response = client.post(
+        "/formula/calculate",
+        json={
+            "hair": {"root_level": 7, "length_level": 6},
+            "target": {"level": 6},
+            "zoned": True,
+            "root_grams": "Infinity",
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_check_endpoint():
+    response = client.post(
+        "/formula/check",
+        json={
+            "hair": {"root_level": 7, "length_level": 7, "grey_percent": 30, "has_keratin": False},
+            "target": {"level": 7, "direction": "cool"},
+            "master_formula": [{"shade": "7/3", "grams": 60}],
+            "oxide_percent": 3,
+        },
+    )
+    assert response.status_code == 200
+    assert {x["rule_id"] for x in response.json()["risks"]} == {"C-COVERAGE", "C-OXIDE", "C-DIRECTION"}

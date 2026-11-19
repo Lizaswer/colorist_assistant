@@ -1,0 +1,25 @@
+{
+  "id": "04-wella-koleston-darkening",
+  "verified": false,
+  "brand": "wella",
+  "line": "koleston_perfect",
+  "hair": {
+    "root_level": 8,
+    "length_level": 8,
+    "grey_percent": 0,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 6,
+    "direction": "neutral"
+  },
+  "expected": {
+    "components": [
+      {"shade": "6/0", "grams": 100}
+    ],
+    "oxide_percent": 4,
+    "mix_ratio": "1:1",
+    "time_min": 35
+  },
+  "known_gap": "Затемнение на 2 уровня — граница поддерживаемого диапазона. Затемнение на 3 и более уровней отклоняется."
+}

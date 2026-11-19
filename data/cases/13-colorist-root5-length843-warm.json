@@ -1,0 +1,65 @@
+{
+  "id": "13-colorist-root5-length843-warm",
+  "verified": true,
+  "source": "кейс от колориста",
+  "brand": "wella",
+  "line": "koleston_perfect",
+  "notation": "decimal",
+  "hair": {
+    "root_level": 5,
+    "length_level": 8,
+    "grey_percent": 60,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 7,
+    "direction": "warm",
+    "shade_code": "7.43"
+  },
+  "amounts": {
+    "root_grams": 30,
+    "length_grams": 15
+  },
+  "expected_zones": [
+    {
+      "zone": "root",
+      "components": [
+        {"shade": "7.43", "grams": 15},
+        {"shade": "6.3", "grams": 15}
+      ],
+      "oxide_percent": 6,
+      "oxide_grams": 30,
+      "mix_ratio": "1:1",
+      "correctors": []
+    },
+    {
+      "zone": "length",
+      "components": [{"shade": "8.43", "grams": 15}],
+      "oxide_percent": 3,
+      "oxide_grams": 15,
+      "mix_ratio": "1:1",
+      "correctors": []
+    }
+  ],
+  "colorist_solution": {
+    "zones": [
+      {
+        "zone": "корни",
+        "color": [
+          {"shade": "7.43", "grams": 15},
+          {"shade": "6.3", "grams": 15}
+        ],
+        "oxide": {"percent": 6, "grams": 30},
+        "corrector": []
+      },
+      {
+        "zone": "длина",
+        "color": [{"shade": "8.43", "grams": 15}],
+        "oxide": {"percent": 3, "grams": 15},
+        "corrector": []
+      }
+    ],
+    "summary": "Корни: 7.43 (15 г) + 6.3 (15 г) + 6% оксид (30 г). Длина: 8.43 (15 г) + 3% оксид (15 г). Корректор не нужен — тёплое направление."
+  },
+  "known_gap": "Правило «корректор не нужен для тёплых направлений» выведено из этого кейса; для других тёплых тонов (например 7.3) поведение не подтверждено."
+}

@@ -1,0 +1,25 @@
+{
+  "id": "06-wella-illumina-high-grey",
+  "verified": false,
+  "brand": "wella",
+  "line": "illumina",
+  "hair": {
+    "root_level": 6,
+    "length_level": 6,
+    "grey_percent": 50,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 6,
+    "direction": "neutral"
+  },
+  "expected": {
+    "components": [
+      {"shade": "6/0", "grams": 100}
+    ],
+    "oxide_percent": 9,
+    "mix_ratio": "1:1",
+    "time_min": 35
+  },
+  "known_gap": "Для седины от 50% Illumina использует 9% оксид. При нейтральной цели натуральная база и нюанс совпадают в оттенке 6/0; пропорцию нужно подтвердить колористом."
+}
