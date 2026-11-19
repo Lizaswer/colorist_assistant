@@ -1,0 +1,25 @@
+{
+  "id": "10-wella-lightening-out-of-scope",
+  "verified": false,
+  "brand": "wella",
+  "line": "koleston_perfect",
+  "hair": {
+    "root_level": 6,
+    "length_level": 6,
+    "grey_percent": 0,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 8,
+    "direction": "cool"
+  },
+  "expected": {
+    "components": [{"shade": "8/1", "grams": 100}]
+  },
+  "master_formula": {
+    "components": [{"shade": "8/1", "grams": 60}],
+    "oxide_percent": 4
+  },
+  "expected_risk_ids": ["C-LEVEL"],
+  "known_gap": "Осветление не входит в поддерживаемый диапазон MVP: калькулятор отклоняет запрос, чекер помечает формулу ошибкой уровня."
+}

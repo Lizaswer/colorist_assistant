@@ -1,0 +1,25 @@
+{
+  "id": "02-wella-koleston-ton-in-tone",
+  "verified": false,
+  "brand": "wella",
+  "line": "koleston_perfect",
+  "hair": {
+    "root_level": 6,
+    "length_level": 6,
+    "grey_percent": 0,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 6,
+    "direction": "neutral"
+  },
+  "expected": {
+    "components": [
+      {"shade": "6/0", "grams": 100}
+    ],
+    "oxide_percent": 4,
+    "mix_ratio": "1:1",
+    "time_min": 35
+  },
+  "known_gap": "Тон-в-тон без седины: натуральная база не добавляется. Процент оксида — допущение профиля."
+}

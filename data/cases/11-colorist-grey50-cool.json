@@ -1,0 +1,45 @@
+{
+  "id": "11-colorist-grey50-cool",
+  "verified": true,
+  "source": "кейс от колориста",
+  "brand": "wella",
+  "line": "koleston_perfect",
+  "notation": "decimal",
+  "hair": {
+    "root_level": 7,
+    "length_level": 7,
+    "grey_percent": 50,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 7,
+    "direction": "cool",
+    "shade_code": "7.1"
+  },
+  "amounts": {
+    "root_grams": 30,
+    "length_grams": 30
+  },
+  "expected_zones": [
+    {
+      "zone": "all",
+      "components": [{"shade": "6.112", "grams": 30}],
+      "oxide_percent": 6,
+      "oxide_grams": 30,
+      "mix_ratio": "1:1",
+      "correctors": [{"shade": "0.82", "cm": 3}]
+    }
+  ],
+  "colorist_solution": {
+    "zones": [
+      {
+        "zone": "корни и длина",
+        "color": [{"shade": "6.112", "grams": 30}],
+        "oxide": {"percent": 6, "grams": 30},
+        "corrector": [{"shade": "0.82", "cm": 3}]
+      }
+    ],
+    "summary": "6.112 (30 г) + 6% оксид (30 г) + корректор 0.82 (3 см)"
+  },
+  "known_gap": "Каталог оттенков содержит только коды из кейсов колориста (6.112, 8.25); остальная палитра выводится в производной нотации level.tone и требует технической карты бренда."
+}

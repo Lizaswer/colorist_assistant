@@ -1,0 +1,30 @@
+{
+  "id": "00-example",
+  "verified": true,
+  "brand": "generic",
+  "hair": {
+    "root_level": 7,
+    "length_level": 7,
+    "grey_percent": 30,
+    "has_keratin": false
+  },
+  "target": {
+    "level": 7,
+    "direction": "cool"
+  },
+  "expected": {
+    "components": [
+      {"shade": "7/0", "grams": 30},
+      {"shade": "7/1", "grams": 70}
+    ],
+    "oxide_percent": 6,
+    "mix_ratio": "1:1",
+    "time_min": 35
+  },
+  "master_formula": {
+    "components": [{"shade": "7/3", "grams": 60}],
+    "oxide_percent": 3
+  },
+  "expected_risk_ids": ["C-COVERAGE", "C-OXIDE", "C-DIRECTION"],
+  "known_gap": "Синтетический MVP-кейс; не является эталоном бренда."
+}
